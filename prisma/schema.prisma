@@ -19,6 +19,7 @@ model User {
   email     String    @unique
   password  String
   image     String?
+  provider  Provider  @default(CREDENTIALS)
   role      Role      @default(USER)
   deletedAt DateTime?
   createdAt DateTime  @default(now())
@@ -26,6 +27,11 @@ model User {
   addresses Address[]
 
   @@map("users")
+}
+
+enum Provider {
+  CREDENTIALS
+  GOOGLE
 }
 
 model Address {

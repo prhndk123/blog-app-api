@@ -1,7 +1,9 @@
+import axios from "axios";
 import { PrismaClient, User } from "../../generated/prisma/client.js";
 import { comparePassword, hashPassword } from "../../lib/argon.js";
 import { ApiError } from "../../utils/api-error.js";
 import jwt from "jsonwebtoken";
+import { UserInfo } from "../../types/google.js";
 
 export class AuthService {
   //   prisma: PrismaClient;
@@ -57,5 +59,59 @@ export class AuthService {
     //6. Return data usernya
     const { password, ...userWithoutPassword } = user;
     return { ...userWithoutPassword, accessToken };
+  };
+
+  google = async (body: { accessToken: string }) => {
+    const { data } = await axios.get<UserInfo>(
+      "https://www.googleapis.com/oauth2/v3/userinfo",
+      {
+        headers: {
+          Authorization: `Bearer ${body.accessToken}`,
+        },
+      },
+    );
+
+    const user = await this.prisma.user.findUnique({
+      where: { email: data.email },
+    });
+
+    // helper
+    const signToken = (user: { id: number; role: string }) =>
+      jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET!, {
+        expiresIn: "2h",
+      });
+
+    const sanitizeUser = <T extends { password?: string }>(user: T) => {
+      const { password, ...rest } = user;
+      return rest;
+    };
+
+    // user belum ada → create
+    if (!user) {
+      const newUser = await this.prisma.user.create({
+        data: {
+          name: data.name,
+          email: data.email,
+          password: "",
+          provider: "GOOGLE",
+        },
+      });
+
+      return {
+        ...sanitizeUser(newUser),
+        accessToken: signToken(newUser),
+      };
+    }
+
+    // user ada tapi bukan google
+    if (user.provider !== "GOOGLE") {
+      throw new ApiError("Account already registered without google", 400);
+    }
+
+    // user google existing
+    return {
+      ...sanitizeUser(user),
+      accessToken: signToken(user),
+    };
   };
 }
