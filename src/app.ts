@@ -8,6 +8,7 @@ import { ApiError } from "./utils/api-error.js";
 import { UserService } from "./modules/user/user.service.js";
 import { UserController } from "./modules/user/user.controller.js";
 import { UserRouter } from "./modules/user/user.router.js";
+import { AuthMiddleware } from "./middleware/auth.middleware.js";
 
 const PORT = 8000;
 
@@ -16,8 +17,8 @@ export class App {
 
   constructor() {
     this.app = express();
-    this.registerModules();
     this.configure();
+    this.registerModules();
     this.handleError();
   }
 
@@ -38,9 +39,12 @@ export class App {
     const authController = new AuthController(authService);
     const userController = new UserController(userService);
 
+    // middlewares
+    const authMiddleware = new AuthMiddleware();
+
     // routes
     const authRouter = new AuthRouter(authController);
-    const userRouter = new UserRouter(userController);
+    const userRouter = new UserRouter(userController, authMiddleware);
 
     // entry point
     this.app.use("/auth", authRouter.getRouter());
