@@ -1,6 +1,7 @@
 import express, { Router } from "express";
 import { UserController } from "./user.controller.js";
 import { AuthMiddleware } from "../../middleware/auth.middleware.js";
+import { UploadMiddleware } from "../../middleware/upload.middleware.js";
 
 export class UserRouter {
   private router: Router;
@@ -8,6 +9,7 @@ export class UserRouter {
   constructor(
     private userController: UserController,
     private authMiddleware: AuthMiddleware,
+    private uploadMiddleware: UploadMiddleware,
   ) {
     this.router = express.Router();
     this.initRoutes();
@@ -22,6 +24,12 @@ export class UserRouter {
     );
     this.router.get("/:id", this.userController.getUser);
     this.router.post("/", this.userController.createUser);
+    this.router.post(
+      "/photo",
+      this.authMiddleware.verifyToken(process.env.JWT_SECRET!),
+      this.uploadMiddleware.upload().fields([{ name: "photo", maxCount: 1 }]),
+      this.userController.uploadPhoto,
+    );
     this.router.patch("/:id", this.userController.updateUser);
     this.router.delete("/:id", this.userController.deleteUser);
   };

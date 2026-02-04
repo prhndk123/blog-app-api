@@ -14,6 +14,8 @@ import {
   errorMiddleware,
   notFoundMiddleware,
 } from "./middleware/error.middleware.js";
+import { CloudinaryService } from "./modules/cloudinary/cloudinary.service.js";
+import { UploadMiddleware } from "./middleware/upload.middleware.js";
 
 const PORT = 8000;
 
@@ -37,8 +39,9 @@ export class App {
     const prismaClient = prisma;
 
     // services
+    const cloudinaryService = new CloudinaryService();
     const authService = new AuthService(prismaClient);
-    const userService = new UserService(prismaClient);
+    const userService = new UserService(prismaClient, cloudinaryService);
 
     // controllers
     const authController = new AuthController(authService);
@@ -47,10 +50,15 @@ export class App {
     // middlewares
     const authMiddleware = new AuthMiddleware();
     const validationMiddleware = new ValidationMiddleware();
+    const uploadMiddleware = new UploadMiddleware();
 
     // routes
     const authRouter = new AuthRouter(authController, validationMiddleware);
-    const userRouter = new UserRouter(userController, authMiddleware);
+    const userRouter = new UserRouter(
+      userController,
+      authMiddleware,
+      uploadMiddleware,
+    );
 
     // entry point
     this.app.use("/auth", authRouter.getRouter());
