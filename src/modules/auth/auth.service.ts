@@ -4,6 +4,9 @@ import { comparePassword, hashPassword } from "../../lib/argon.js";
 import { ApiError } from "../../utils/api-error.js";
 import jwt from "jsonwebtoken";
 import { UserInfo } from "../../types/google.js";
+import { RegisterDto } from "./dto/register.dto.js";
+import { LoginDto } from "./dto/login.dto.js";
+import { GoogleDto } from "./dto/google.dto.js";
 
 export class AuthService {
   //   prisma: PrismaClient;
@@ -11,7 +14,7 @@ export class AuthService {
     // this.prisma = prisma;
   }
 
-  register = async (body: Pick<User, "name" | "email" | "password">) => {
+  register = async (body: RegisterDto) => {
     //1. Cek avaibilitas email
     const user = await this.prisma.user.findUnique({
       where: { email: body.email },
@@ -36,7 +39,7 @@ export class AuthService {
     return { message: "Register Success" };
   };
 
-  login = async (body: Pick<User, "email" | "password">) => {
+  login = async (body: LoginDto) => {
     //1. Cek Emailnya ada ga
     const user = await this.prisma.user.findUnique({
       where: { email: body.email },
@@ -61,7 +64,7 @@ export class AuthService {
     return { ...userWithoutPassword, accessToken };
   };
 
-  google = async (body: { accessToken: string }) => {
+  google = async (body: GoogleDto) => {
     const { data } = await axios.get<UserInfo>(
       "https://www.googleapis.com/oauth2/v3/userinfo",
       {

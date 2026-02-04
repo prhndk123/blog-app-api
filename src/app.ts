@@ -9,6 +9,11 @@ import { UserService } from "./modules/user/user.service.js";
 import { UserController } from "./modules/user/user.controller.js";
 import { UserRouter } from "./modules/user/user.router.js";
 import { AuthMiddleware } from "./middleware/auth.middleware.js";
+import { ValidationMiddleware } from "./middleware/validation.middleware.js";
+import {
+  errorMiddleware,
+  notFoundMiddleware,
+} from "./middleware/error.middleware.js";
 
 const PORT = 8000;
 
@@ -41,9 +46,10 @@ export class App {
 
     // middlewares
     const authMiddleware = new AuthMiddleware();
+    const validationMiddleware = new ValidationMiddleware();
 
     // routes
-    const authRouter = new AuthRouter(authController);
+    const authRouter = new AuthRouter(authController, validationMiddleware);
     const userRouter = new UserRouter(userController, authMiddleware);
 
     // entry point
@@ -52,22 +58,8 @@ export class App {
   };
 
   private handleError = () => {
-    this.app.use(
-      (
-        err: ApiError,
-        req: express.Request,
-        res: express.Response,
-        next: express.NextFunction,
-      ) => {
-        const message = err.message || "Something went wrong!";
-        const status = err.status || 500;
-        res.status(status).send({ message });
-      },
-    );
-
-    this.app.use((req: express.Request, res: express.Response) => {
-      res.status(404).send({ message: "Route not found" });
-    });
+    this.app.use(errorMiddleware);
+    this.app.use(notFoundMiddleware);
   };
 
   start() {
