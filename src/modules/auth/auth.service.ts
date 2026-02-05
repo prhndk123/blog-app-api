@@ -7,12 +7,13 @@ import { UserInfo } from "../../types/google.js";
 import { RegisterDto } from "./dto/register.dto.js";
 import { LoginDto } from "./dto/login.dto.js";
 import { GoogleDto } from "./dto/google.dto.js";
+import { MailService } from "../mail/mail.service.js";
 
 export class AuthService {
-  //   prisma: PrismaClient;
-  constructor(private prisma: PrismaClient) {
-    // this.prisma = prisma;
-  }
+  constructor(
+    private prisma: PrismaClient,
+    private mailService: MailService,
+  ) {}
 
   register = async (body: RegisterDto) => {
     //1. Cek avaibilitas email
@@ -35,7 +36,15 @@ export class AuthService {
       },
     });
 
-    //5. Returm Message Register Success
+    //5. Send email
+    await this.mailService.sendEmail(
+      body.email,
+      `Welcome, ${body.name}`,
+      "welcome",
+      { name: body.name },
+    );
+
+    //6. Returm Message Register Success
     return { message: "Register Success" };
   };
 
