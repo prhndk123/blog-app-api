@@ -6,11 +6,11 @@ import { Role } from "../generated/prisma/enums.js";
 export class AuthMiddleware {
   verifyToken = (secretKey: string) => {
     return (req: Request, res: Response, next: NextFunction) => {
-      const token = req.headers.authorization?.split(" ")[1];
+      const token = req.cookies?.accessToken;
       if (!token) {
         throw new ApiError("Token Not Found", 401);
       }
-      jwt.verify(token, secretKey, (err, payload) => {
+      jwt.verify(token, secretKey, (err: any, payload: any) => {
         if (err) {
           if (err instanceof jwt.JsonWebTokenError) {
             throw new ApiError("Token Expired", 401);

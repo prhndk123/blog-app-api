@@ -17,6 +17,8 @@ import {
 import { CloudinaryService } from "./modules/cloudinary/cloudinary.service.js";
 import { UploadMiddleware } from "./middleware/upload.middleware.js";
 import { MailService } from "./modules/mail/mail.service.js";
+import cookieParser from "cookie-parser";
+import { corsOptions } from "./config/cors.js";
 
 const PORT = 8000;
 
@@ -31,8 +33,9 @@ export class App {
   }
 
   private configure = () => {
-    this.app.use(cors());
+    this.app.use(cors(corsOptions));
     this.app.use(express.json());
+    this.app.use(cookieParser());
   };
 
   private registerModules = () => {
