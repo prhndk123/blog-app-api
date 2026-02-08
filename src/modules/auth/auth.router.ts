@@ -1,0 +1,42 @@
+import { ValidationMiddleware } from "../../middlewares/validation.middleware.js";
+import { AuthController } from "./auth.controller.js";
+import express, { Router } from "express";
+import { RegisterDTO } from "./dto/register.dto.js";
+import { LoginDTO } from "./dto/login.dto.js";
+import { GoogleDTO } from "./dto/google.dto.js";
+
+export class AuthRouter {
+  private router: Router;
+
+  constructor(
+    private authController: AuthController,
+    private validationMiddleware: ValidationMiddleware,
+  ) {
+    this.router = express.Router();
+    this.initRoutes();
+  }
+
+  private initRoutes = () => {
+    this.router.post(
+      "/register",
+      this.validationMiddleware.validateBody(RegisterDTO),
+      this.authController.register,
+    );
+
+    this.router.post(
+      "/login",
+      this.validationMiddleware.validateBody(LoginDTO),
+      this.authController.login,
+    );
+
+    this.router.post(
+      "/google",
+      this.validationMiddleware.validateBody(GoogleDTO),
+      this.authController.google,
+    );
+  };
+
+  getRouter = () => {
+    return this.router;
+  };
+}
