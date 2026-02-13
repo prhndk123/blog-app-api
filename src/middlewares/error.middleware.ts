@@ -9,6 +9,7 @@ export const errorMiddleware = (
   const message = err.message || "Something went wrong!";
   const status = err.status || 500;
   res.status(status).send({ message });
+  console.log(err.message);
 };
 
 export const notFoundMiddleware = (
@@ -16,4 +17,4 @@ export const notFoundMiddleware = (
   res: express.Response,
 ) => {
   res.status(404).send({ message: "Route not found" });
-}
+};

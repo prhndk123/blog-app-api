@@ -1,10 +1,10 @@
 import "dotenv/config";
-import { PrismaPg } from '@prisma/adapter-pg'
-import { PrismaClient } from '../generated/prisma/client.js'
+import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaClient } from "../generated/prisma/client.js";
 
-const connectionString = `${process.env.DATABASE_URL}`
+const connectionString = `${process.env.DATABASE_URL}`;
 
-const adapter = new PrismaPg({ connectionString },{schema:"backend"})// specify schema here
-const prisma = new PrismaClient({ adapter })
+const adapter = new PrismaPg({ connectionString }, { schema: "public" }); // specify schema here
+const prisma = new PrismaClient({ adapter });
 
-export { prisma }
+export { prisma };

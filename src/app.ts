@@ -16,6 +16,10 @@ import { UserRouter } from "./modules/user/user.router.js";
 import { UserService } from "./modules/user/user.service.js";
 import { CloudinaryService } from "./modules/cloudinary/cloudinary.service.js";
 import { MailService } from "./modules/mail/mail.service.js";
+import cookieParser from "cookie-parser";
+import { corsOptions } from "./config/cors.js";
+import { RedisService } from "./redis/redis.service.js";
+import { loggerHttp } from "./lib/logger-http.js";
 
 const PORT = 8000;
 
@@ -30,8 +34,10 @@ export class App {
   }
 
   private configure = () => {
-    this.app.use(cors());
+    this.app.use(cors(corsOptions));
     this.app.use(express.json());
+    this.app.use(cookieParser());
+    this.app.use(loggerHttp);
   };
 
   private registerModules = () => {
@@ -39,10 +45,15 @@ export class App {
     const prismaClient = prisma;
 
     // services
+    const redisService = new RedisService();
     const mailService = new MailService();
     const cloudinaryService = new CloudinaryService();
     const authService = new AuthService(prismaClient, mailService);
-    const userService = new UserService(prismaClient, cloudinaryService);
+    const userService = new UserService(
+      prismaClient,
+      cloudinaryService,
+      redisService,
+    );
 
     // controllers
     const authController = new AuthController(authService);
@@ -54,8 +65,16 @@ export class App {
     const uploadMiddleware = new UploadMiddleware();
 
     // routes
-    const authRouter = new AuthRouter(authController, validationMiddleware);
-    const userRouter = new UserRouter(userController, authMiddleware, uploadMiddleware);
+    const authRouter = new AuthRouter(
+      authController,
+      validationMiddleware,
+      authMiddleware,
+    );
+    const userRouter = new UserRouter(
+      userController,
+      authMiddleware,
+      uploadMiddleware,
+    );
 
     // entry point
     this.app.use("/auth", authRouter.getRouter());
