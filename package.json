@@ -9,7 +9,7 @@
     "build": "tsc && npm run copy-files",
     "start": "node dist/src/index.js",
     "dev": "tsx --watch src/index.ts",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate && prisma migrate deploy"
   },
   "keywords": [],
   "author": "",

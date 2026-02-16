@@ -20,6 +20,9 @@ import cookieParser from "cookie-parser";
 import { corsOptions } from "./config/cors.js";
 import { RedisService } from "./redis/redis.service.js";
 import { loggerHttp } from "./lib/logger-http.js";
+import { BlogService } from "./modules/blogs/blog.service.js";
+import { BlogController } from "./modules/blogs/blog.controller.js";
+import { BlogRouter } from "./modules/blogs/blog.router.js";
 
 const PORT = 8000;
 
@@ -54,10 +57,12 @@ export class App {
       cloudinaryService,
       redisService,
     );
+    const blogService = new BlogService(prismaClient);
 
     // controllers
     const authController = new AuthController(authService);
     const userController = new UserController(userService);
+    const blogController = new BlogController(blogService);
 
     //middlewares
     const authMiddleware = new AuthMiddleware();
@@ -75,10 +80,12 @@ export class App {
       authMiddleware,
       uploadMiddleware,
     );
+    const blogRouter = new BlogRouter(blogController);
 
     // entry point
     this.app.use("/auth", authRouter.getRouter());
     this.app.use("/users", userRouter.getRouter());
+    this.app.use("/blogs", blogRouter.getRouter());
   };
 
   private handleError = () => {
