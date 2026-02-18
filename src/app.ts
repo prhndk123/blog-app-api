@@ -57,7 +57,7 @@ export class App {
       cloudinaryService,
       redisService,
     );
-    const blogService = new BlogService(prismaClient);
+    const blogService = new BlogService(prismaClient, cloudinaryService);
 
     // controllers
     const authController = new AuthController(authService);
@@ -80,7 +80,12 @@ export class App {
       authMiddleware,
       uploadMiddleware,
     );
-    const blogRouter = new BlogRouter(blogController);
+    const blogRouter = new BlogRouter(
+      blogController,
+      authMiddleware,
+      uploadMiddleware,
+      validationMiddleware,
+    );
 
     // entry point
     this.app.use("/auth", authRouter.getRouter());
