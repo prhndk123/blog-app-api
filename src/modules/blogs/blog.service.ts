@@ -1,4 +1,5 @@
 import { Prisma, PrismaClient } from "../../generated/prisma/client.js";
+import { ApiError } from "../../utils/api-error.js";
 import { GetBlogsDto } from "./dto/get-blogs.dto.js";
 
 export class BlogService {
@@ -28,5 +29,18 @@ export class BlogService {
 
   getBlog = async (id: number) => {
     return this.prisma.blog.findUnique({ where: { id } });
+  };
+
+  getBlogBySlug = async (slug: string) => {
+    const blog = await this.prisma.blog.findUnique({
+      where: { slug },
+      include: { user: { select: { name: true } } },
+    });
+
+    if (!blog) {
+      throw new ApiError("Blog not found", 404);
+    }
+
+    return blog;
   };
 }

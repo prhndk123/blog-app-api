@@ -11,4 +11,10 @@ export class BlogController {
     const result = await this.blogService.getBlogs(query);
     return res.status(200).send(result);
   };
+
+  getBlogBySlug = async (req: Request, res: Response) => {
+    const slug = String(req.params.slug);
+    const result = await this.blogService.getBlogBySlug(slug);
+    return res.status(200).send(result);
+  };
 }
