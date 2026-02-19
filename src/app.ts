@@ -23,6 +23,8 @@ import { loggerHttp } from "./lib/logger-http.js";
 import { BlogService } from "./modules/blogs/blog.service.js";
 import { BlogController } from "./modules/blogs/blog.controller.js";
 import { BlogRouter } from "./modules/blogs/blog.router.js";
+import { initScheduler } from "./script/index.js";
+import { reminderScheduler } from "./script/reminder.js";
 
 const PORT = 8000;
 
@@ -34,6 +36,7 @@ export class App {
     this.configure();
     this.registerModules();
     this.handleError();
+    initScheduler();
   }
 
   private configure = () => {
